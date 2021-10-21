@@ -8,6 +8,17 @@ from pypulseq.block_to_events import block_to_events
 
 
 def get_grad_abs_mag(grad: SimpleNamespace) -> float:
+    """
+    
+    Parameters
+    ----------
+    grad : SimpleNamespace
+
+    Returns
+    -------
+    max: float
+    max value of the gradient (depending if it's a waveform or trap)
+    """
     if grad.type == 'trap':
         return abs(grad.amplitude)
     else:
@@ -21,14 +32,12 @@ def scale_grad(grad: SimpleNamespace, scale: float) -> SimpleNamespace:
     Parameters
     ----------
     grad : SimpleNamespace
-        Short description what "grad" is
     scale : float
-        Short description what "scale" is
 
     Returns
     -------
     grad : SimpleNamespace
-        Short description what is returned
+       scaled gradient
     """
     if grad.type == 'trap':
         grad.amplitude *= scale
@@ -41,7 +50,7 @@ def scale_grad(grad: SimpleNamespace, scale: float) -> SimpleNamespace:
     return grad
 
 
-def rotate(axis, angle, *args: SimpleNamespace):
+def rotate(axis: str, angle: float, *args: SimpleNamespace):
     """ align set alignment of the objects in the block
        [...] = rotate(axis, angle, obj <, obj> ...);
 
@@ -51,7 +60,7 @@ def rotate(axis, angle, *args: SimpleNamespace):
        Possible rotation axes are 'x', 'y' or 'z'.
 
        Returns an explicit list of objects if multiple parameters are
-       given."""
+       given: list[SimpleNameSpace]."""
 
     axes = np.array(['x', 'y', 'z'])
     # cycle through the objects and rotate gradients non-parallel to the given rotation axis
