@@ -14,16 +14,32 @@ def get_grad_abs_mag(grad):
         return max(abs(grad.waveform))
 
 
-def scale_grad(grad, scale):
-    if grad.type =='trap':
-        grad.amplitude = grad.amplitude * scale
-        grad.area = grad.area * scale
-        grad.flat_area = grad.flat_area * scale
+def scale_grad(grad: SimpleNamespace, scale: float) -> SimpleNamespace:
+    """
+    Put a short descriotion here...
+
+    Parameters
+    ----------
+    grad : SimpleNamespace
+        Short description what "grad" is
+    scale : float
+        Short description what "scale" is
+
+    Returns
+    -------
+    grad : SimpleNamespace
+        Short description what is returned
+    """
+    if grad.type == 'trap':
+        grad.amplitude *= scale
+        grad.area *= scale
+        grad.flat_area *= scale
     else:
-        grad.waveform = grad.waveform * scale
-        grad.first = grad.first * scale
-        grad.last = grad.last * scale
+        grad.waveform *= scale
+        grad.first *= scale
+        grad.last *= scale
     return grad
+
 
 def rotate(axis, angle, *args: SimpleNamespace):
     """ align set alignment of the objects in the block
