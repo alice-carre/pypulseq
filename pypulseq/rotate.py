@@ -7,7 +7,7 @@ from pypulseq.add_gradients import add_gradients
 from pypulseq.block_to_events import block_to_events
 
 
-def get_grad_abs_mag(grad):
+def get_grad_abs_mag(grad: SimpleNamespace) -> float:
     if grad.type == 'trap':
         return abs(grad.amplitude)
     else:
@@ -16,7 +16,7 @@ def get_grad_abs_mag(grad):
 
 def scale_grad(grad: SimpleNamespace, scale: float) -> SimpleNamespace:
     """
-    returns the gradient with its attributes scaled (multiplied with a desired value)
+    returns the gradient with its attributes scaled (multiplied with a desired value 'scale')
 
     Parameters
     ----------
@@ -41,7 +41,7 @@ def scale_grad(grad: SimpleNamespace, scale: float) -> SimpleNamespace:
     return grad
 
 
-def rotate(axis, angle, *args: SimpleNamespace):
+def rotate(axis, angle, *args: SimpleNamespace)-> list[SimpleNamespace]:
     """ align set alignment of the objects in the block
        [...] = rotate(axis, angle, obj <, obj> ...);
 
@@ -50,9 +50,8 @@ def rotate(axis, angle, *args: SimpleNamespace):
        non-gradient objects are not affected.
        Possible rotation axes are 'x', 'y' or 'z'.
 
-       Returns either a cell-array of objects if one return parameter is
-       provided or an explicit list of objects if multiple parameters are
-       given. Can be used directly as a parameter of seq.addBlock()."""
+       Returns an explicit list of objects if multiple parameters are
+       given."""
 
     axes = np.array(['x', 'y', 'z'])
     # cycle through the objects and rotate gradients non-parallel to the given rotation axis
