@@ -16,7 +16,7 @@ def get_grad_abs_mag(grad):
 
 def scale_grad(grad: SimpleNamespace, scale: float) -> SimpleNamespace:
     """
-    Put a short descriotion here...
+    returns the gradient with its attributes scaled (multiplied with a desired value)
 
     Parameters
     ----------
