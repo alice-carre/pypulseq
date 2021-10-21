@@ -41,7 +41,7 @@ def scale_grad(grad: SimpleNamespace, scale: float) -> SimpleNamespace:
     return grad
 
 
-def rotate(axis, angle, *args: SimpleNamespace)-> list[SimpleNamespace]:
+def rotate(axis, angle, *args: SimpleNamespace):
     """ align set alignment of the objects in the block
        [...] = rotate(axis, angle, obj <, obj> ...);
 
