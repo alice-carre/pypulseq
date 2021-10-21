@@ -9,13 +9,13 @@ from pypulseq.rotate import rotate
 from pypulseq.rotate import scale_grad
 from pypulseq.rotate import get_grad_abs_mag
 seq = pp.Sequence() #Create a new sequence object
-fov=250e-3 #Define FOV
-Nx=256 #Define resolution
-alpha=10 #flip angle
+fov = 250e-3 #Define FOV
+Nx = 256 #Define resolution
+alpha = 10 #flip angle
 slice_thickness = 3e-3  # slice
 TE = np.array([8e-3])  # TE; give a vector here to have multiple TEs (e.g. for field mapping)
 TR = np.array([100e-3]) # only a single value for now
-Nr=128 #number of radial spokes
+Nr = 128 #number of radial spokes
 Ndummy = 20  # number of dummy scans
 delta = np.pi / Nr  # angular increment; try golden angle pi*(3-5^0.5) or 0.5 of it
 
