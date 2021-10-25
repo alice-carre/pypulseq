@@ -23,11 +23,13 @@ def traj_to_grad(k: np.ndarray, raster_time: float = Opts().grad_raster_time) ->
     sr : numpy.ndarray
         Slew rate.
     """
-    g = (k[1:] - k[:-1]) / raster_time
-    sr0 = (g[1:] - g[:-1]) / raster_time
-    sr = np.zeros(len(sr0) + 1)
-    sr[0] = sr0[0]
-    sr[1:-1] = 0.5 * (sr0[-1] + sr0[1:])
-    sr[-1] = sr0[-1]
 
+    g = (k[:, 1:] - k[:, :-1]) / raster_time
+    sr0 = (g[:, 1:] - g[:, :-1]) / raster_time
+    #print(len(sr0[1]))
+    sr = np.zeros((len(sr0), len(sr0[0])+1))
+    sr[:, 0] = sr0[:, 0]
+    sr[:, 1:-1] = 0.5 * (sr0[:, :-1] + sr0[:, 1:])
+    sr[:, -1] = sr0[:, -1]
+    #print(len(sr[0]))
     return g, sr
