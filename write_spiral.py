@@ -213,7 +213,15 @@ for s in range(0, N_slices):
         seq.add_block(rot2[0], rot2[1], rot2[2], rot2[3], rot2[4])
     else:
         raise TypeError("number of rotated inputs not supported")
-
+        
+#Check whether the timing of the sequence is correct
+ok, error_report = seq.check_timing()
+if ok:
+    print('Timing check passed successfully')
+else:
+    print('Timing check failed! Error listing follows\n')
+    print(error_report)
+    
 seq.set_definition('FOV', [fov, fov, slice_thickness])
 seq.set_definition('Name', 'spiral')
 seq.set_definition('MaxAdcSegmentLength', adc_samples_per_segment)
