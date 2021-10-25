@@ -127,11 +127,19 @@ for i in range(-Ndummy, Nr+1, 1):
 
 
 seq.plot()
+plt.show()
 # Prepare the sequence output for the scanner
 seq.set_definition('FOV', [fov, fov, slice_thickness])
 seq.set_definition('Name', 'gre_rad')
 seq.write('gre_rad_pypulseq.seq')
 
-
+#trajectory calculation
+k_traj_adc, k_traj, t_excitation, t_refocusing, t_adc = seq.calculate_kspace()
+plt.figure()
+plt.plot(np.transpose(k_traj))
+plt.figure()
+plt.plot(k_traj[0], k_traj[1], 'b')
+plt.plot(k_traj_adc[0], k_traj_adc[1], 'r.')
+plt.show()
 
 
