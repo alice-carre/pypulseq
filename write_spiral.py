@@ -237,4 +237,4 @@ plt.plot(np.transpose(k_traj))
 plt.figure()
 plt.plot(k_traj[0], k_traj[1], 'b')
 plt.plot(k_traj_adc[0], k_traj_adc[1], 'r.')
-
+plt.show()
