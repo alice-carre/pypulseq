@@ -2,6 +2,7 @@ import math
 import numpy as np
 import copy
 from types import SimpleNamespace
+from typing import List
 
 from pypulseq.add_gradients import add_gradients
 from pypulseq.block_to_events import block_to_events
@@ -50,7 +51,7 @@ def scale_grad(grad: SimpleNamespace, scale: float) -> SimpleNamespace:
     return grad
 
 
-def rotate(axis: str, angle: float, *args: SimpleNamespace):
+def rotate(axis: str, angle: float, *args: SimpleNamespace) -> List[SimpleNamespace]:
     """ align set alignment of the objects in the block
        [...] = rotate(axis, angle, obj <, obj> ...);
 
