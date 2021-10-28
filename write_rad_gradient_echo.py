@@ -143,3 +143,20 @@ plt.plot(k_traj_adc[0], k_traj_adc[1], 'r.')
 plt.show()
 
 
+#change the k-space-trajectory in a (256,128,2) format instead of (3, 32768)
+k_traj_neu = np.zeros((256,128,2))
+
+k_traj_neu[:, :, 0] = np.reshape(k_traj_adc[0], (256, 128), order='F')
+k_traj_neu[:, :, 1] = np.reshape(k_traj_adc[1], (256, 128), order='F')
+
+# redefine limits so that the trajectory is between -0.5 and 0.5
+max0 = round(np.max(k_traj_neu[:, :, 0]))
+k_traj_neu[:, :, 0] = k_traj_neu[:, :, 0]/max0*0.5
+k_traj_neu[:, :, 1] = k_traj_neu[:, :, 1]/max0*0.5
+
+k_traj_neu = k_traj_neu.astype('float32')
+
+# save the new kspace trajectory
+np.save('k_traj_neu', k_traj_neu)
+
+
