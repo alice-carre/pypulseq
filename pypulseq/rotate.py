@@ -10,7 +10,7 @@ from pypulseq.block_to_events import block_to_events
 
 def get_grad_abs_mag(grad: SimpleNamespace) -> float:
     """
-    
+
     Parameters
     ----------
     grad : SimpleNamespace
@@ -95,8 +95,8 @@ def rotate(axis: str, angle: float, *args: SimpleNamespace) -> List[SimpleNamesp
     # original axis and one on the other from the axes2rot list
 
     max_mag = 0  # measure of the relevant amplitude
-    rotated1 = [None]*(len(irotate1) + len(irotate2))
-    rotated2 = [None]*(len(irotate1) + len(irotate2))
+    rotated1 = [None] * (len(irotate1) + len(irotate2))
+    rotated2 = [None] * (len(irotate1) + len(irotate2))
 
     for i in range(0, len(irotate1)):
         g = copy.deepcopy(events[irotate1[i]])
@@ -113,18 +113,18 @@ def rotate(axis: str, angle: float, *args: SimpleNamespace) -> List[SimpleNamesp
         g = copy.deepcopy(events[irotate2[i]])
         g2 = copy.deepcopy(events[irotate2[i]])
         max_mag = max(max_mag, get_grad_abs_mag(g))
-        rotated2[i+o] = copy.deepcopy(scale_grad(g, math.cos(angle)))
+        rotated2[i + o] = copy.deepcopy(scale_grad(g, math.cos(angle)))
         g = scale_grad(g2, -math.sin(angle))
         g2.channel = axes2rot[0]
-        rotated1[i+o] = copy.deepcopy(g2)
-    thresh = 1e-6*max_mag
+        rotated1[i + o] = copy.deepcopy(g2)
+    thresh = 1e-6 * max_mag
 
-    #eliminate gradient components under a certain thresh value
+    # eliminate gradient components under a certain thresh value
 
-    for i in range(len(rotated1)-1, -1, -1):
+    for i in range(len(rotated1) - 1, -1, -1):
         if get_grad_abs_mag(rotated1[i]) < thresh:
             del rotated1[i]
-    for i in range (len(rotated2)-1, -1, -1):
+    for i in range(len(rotated2) - 1, -1, -1):
         if get_grad_abs_mag(rotated2[i]) < thresh:
             del rotated2[i]
 
@@ -139,15 +139,13 @@ def rotate(axis: str, angle: float, *args: SimpleNamespace) -> List[SimpleNamesp
         g_modif[1] = add_gradients(rotated2)
     elif len(rotated2) != 0:
         g_modif[1] = rotated2[0]
-    for i in range (len(g_modif)-1, -1, -1):
+    for i in range(len(g_modif) - 1, -1, -1):
         if g_modif[i] is None or get_grad_abs_mag(g_modif[i]) < thresh:
            del g_modif[i]
 
-    #export
-    bypass=[]
+    # export
+    bypass = []
     for i in ibypass:
         bypass.append(events[i])
-    out = bypass+g_modif
+    out = bypass + g_modif
     return out
-
-
