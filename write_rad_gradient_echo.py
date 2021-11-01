@@ -18,7 +18,7 @@ TE = np.array([8e-3])  # TE; give a vector here to have multiple TEs (e.g. for f
 TR = np.array([100e-3])  # only a single value for now
 Nr = 128  # number of radial spokes
 Ndummy = 20  # number of dummy scans
-delta = np.pi / Nr  # angular increment; try golden angle pi*(3-5^0.5) or 0.5 of it
+delta = np.pi / Nr  # angular increment
 
 # more in-depth parameters
 rf_spoiling_inc = 117  # RF spoiling increment
@@ -145,10 +145,10 @@ plt.show()
 
 #change the k-space-trajectory in a (256,128,2) format instead of (3, 32768)
 #useful for image reconstruction
-k_traj_neu = np.zeros((256,128,2))
+k_traj_neu = np.zeros((Nx, Nr, 2))
 
-k_traj_neu[:, :, 0] = np.reshape(k_traj_adc[0], (256, 128), order='F')
-k_traj_neu[:, :, 1] = np.reshape(k_traj_adc[1], (256, 128), order='F')
+k_traj_neu[:, :, 0] = np.reshape(k_traj_adc[0], (Nx, Nr), order='F')
+k_traj_neu[:, :, 1] = np.reshape(k_traj_adc[1], (Nx, Nr), order='F')
 
 # redefine limits so that the trajectory is between -0.5 and 0.5
 max0 = round(np.max(k_traj_neu[:, :, 0]))
