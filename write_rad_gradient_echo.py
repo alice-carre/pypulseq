@@ -8,14 +8,15 @@ import pypulseq as pp
 from pypulseq.rotate import rotate
 from pypulseq.rotate import scale_grad
 from pypulseq.rotate import get_grad_abs_mag
-seq = pp.Sequence() #Create a new sequence object
-fov = 250e-3 #Define FOV
-Nx = 256 #Define resolution
-alpha = 10 #flip angle
+
+seq = pp.Sequence()  # Create a new sequence object
+fov = 250e-3  # Define FOV
+Nx = 256  # Define resolution
+alpha = 10  # flip angle
 slice_thickness = 3e-3  # slice
 TE = np.array([8e-3])  # TE; give a vector here to have multiple TEs (e.g. for field mapping)
-TR = np.array([100e-3]) # only a single value for now
-Nr = 128 #number of radial spokes
+TR = np.array([100e-3])  # only a single value for now
+Nr = 128  # number of radial spokes
 Ndummy = 20  # number of dummy scans
 delta = np.pi / Nr  # angular increment; try golden angle pi*(3-5^0.5) or 0.5 of it
 
@@ -35,7 +36,6 @@ adc.delay = adc.delay - 0.5 * adc.dwell  # compensate for the 0.5 samples shift
 gx_pre = pp.make_trapezoid(channel='x', area=-gx.area / 2, duration=2e-3, system=system)
 gz_reph = pp.make_trapezoid(channel='z', area=-gz.area / 2, duration=2e-3, system=system)
 
-
 # Gradient spoiling
 gx_spoil = pp.make_trapezoid(channel='x', area=0.5 * Nx * delta_k, system=system)
 gz_spoil = pp.make_trapezoid(channel='z', area=4 / slice_thickness, system=system)
@@ -51,7 +51,7 @@ assert np.all(delay_TR >= pp.calc_duration(gx_spoil, gz_spoil))
 rf_phase = 0
 rf_inc = 0
 
-for i in range(-Ndummy, Nr+1, 1):
+for i in range(-Ndummy, Nr + 1, 1):
     for j in range(0, len(TE)):
         rf.phase_offset = rf_phase / 180 * np.pi
         adc.phase_offset = rf_phase / 180 * np.pi
@@ -62,9 +62,9 @@ for i in range(-Ndummy, Nr+1, 1):
 
         # Rotation of gradient object(s) about the given axis and projection on cartesian axis to add it as a block to the sequence
         # Not very clean way to add events but the best way I found since add_block wouldn't take a list[SimpleNameSpace] as argument
-        #The list has a variable length since sometimes gradients have to be projected on one or two axis
+        #The list returned by the rotate function has a variable length since sometimes gradients have to be projected on one or two axis
 
-        rot1=rotate('z', phi, gx_pre, gz_reph)
+        rot1 = rotate('z', phi, gx_pre, gz_reph)
         if len(rot1) == 1:
             seq.add_block(rot1[0])
         elif len(rot1) == 2:
@@ -81,7 +81,7 @@ for i in range(-Ndummy, Nr+1, 1):
         seq.add_block(pp.make_delay(delay_TE[j]))
 
         if i > 0:
-            rot2=rotate('z', phi, gx, adc)
+            rot2 = rotate('z', phi, gx, adc)
             if len(rot2) == 1:
                 seq.add_block(rot2[0])
             elif len(rot2) == 2:
@@ -112,12 +112,12 @@ for i in range(-Ndummy, Nr+1, 1):
                 raise TypeError("number of rotated inputs not supported")
 
         rot4 = rotate('z', phi, gx_spoil, gz_spoil, pp.make_delay(delay_TR[j]))
-        if len(rot4)==1:
-                seq.add_block(rot4[0])
+        if len(rot4) == 1:
+            seq.add_block(rot4[0])
         elif len(rot4) == 2:
-                seq.add_block(rot4[0],rot4[1])
+            seq.add_block(rot4[0], rot4[1])
         elif len(rot4) == 3:
-                seq.add_block(rot4[0],rot4[1], rot4[2])
+            seq.add_block(rot4[0], rot4[1], rot4[2])
         elif len(rot4) == 4:
             seq.add_block(rot4[0], rot4[1], rot4[2], rot4[3])
         elif len(rot4) == 5:
@@ -133,7 +133,7 @@ seq.set_definition('FOV', [fov, fov, slice_thickness])
 seq.set_definition('Name', 'gre_rad')
 seq.write('gre_rad_pypulseq.seq')
 
-#trajectory calculation
+# trajectory calculation
 k_traj_adc, k_traj, t_excitation, t_refocusing, t_adc = seq.calculate_kspace()
 plt.figure()
 plt.plot(np.transpose(k_traj))
@@ -144,6 +144,7 @@ plt.show()
 
 
 #change the k-space-trajectory in a (256,128,2) format instead of (3, 32768)
+#useful for image reconstruction
 k_traj_neu = np.zeros((256,128,2))
 
 k_traj_neu[:, :, 0] = np.reshape(k_traj_adc[0], (256, 128), order='F')
@@ -151,12 +152,7 @@ k_traj_neu[:, :, 1] = np.reshape(k_traj_adc[1], (256, 128), order='F')
 
 # redefine limits so that the trajectory is between -0.5 and 0.5
 max0 = round(np.max(k_traj_neu[:, :, 0]))
-k_traj_neu[:, :, 0] = k_traj_neu[:, :, 0]/max0*0.5
-k_traj_neu[:, :, 1] = k_traj_neu[:, :, 1]/max0*0.5
+k_traj_neu[:, :, 0] = k_traj_neu[:, :, 0] / max0 * 0.5
+k_traj_neu[:, :, 1] = k_traj_neu[:, :, 1] / max0 * 0.5
 
 k_traj_neu = k_traj_neu.astype('float32')
-
-# save the new kspace trajectory
-np.save('k_traj_neu', k_traj_neu)
-
-
