@@ -131,6 +131,11 @@ plt.show()
 # Prepare the sequence output for the scanner
 seq.set_definition('FOV', [fov, fov, slice_thickness])
 seq.set_definition('Name', 'gre_rad')
+seq.set_definition('TE', TE)
+seq.set_definition('TR', TR)
+seq.set_definition('Flipangle', alpha)
+seq.set_definition('Nx', Nx)
+seq.set_definition('Nr', Nr)
 seq.write('gre_rad_pypulseq.seq')
 
 # trajectory calculation
