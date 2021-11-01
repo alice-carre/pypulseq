@@ -97,6 +97,8 @@ def rotate(axis: str, angle: float, *args: SimpleNamespace) -> List[SimpleNamesp
     max_mag = 0  # measure of the relevant amplitude
     rotated1 = [None] * (len(irotate1) + len(irotate2))
     rotated2 = [None] * (len(irotate1) + len(irotate2))
+    
+    # the copy function has been used here because otherwise the object itself is modified and problem appear in loops
 
     for i in range(0, len(irotate1)):
         g = copy.deepcopy(events[irotate1[i]])
