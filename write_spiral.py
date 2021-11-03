@@ -10,8 +10,8 @@ from pypulseq.rotate import rotate
 from pypulseq.make_arbitrary_grad import make_arbitrary_grad
 
 seq = pp.Sequence() #Create a new sequence object
-fov = 256e-3 #Define FOV
-Nx = 96 #Define resolution
+fov = 256e-3 # Define FOV
+Nx = 96 # Define resolution
 Ny = Nx
 slice_thickness = 3e-3  # Slice thickness
 N_slices = 1
