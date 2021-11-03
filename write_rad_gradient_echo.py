@@ -20,6 +20,9 @@ Nr = 128  # number of radial spokes
 Ndummy = 20  # number of dummy scans
 delta = np.pi / Nr  # angular increment
 
+# Golden Angle Case:
+#delta = (np.pi / 180) * (180 * 0.618034) # angular increment # full spokes
+
 # more in-depth parameters
 rf_spoiling_inc = 117  # RF spoiling increment
 system = pp.Opts(max_grad=28, grad_unit='mT/m', max_slew=80, slew_unit='T/m/s', rf_ringdown_time=20e-6,
@@ -138,7 +141,7 @@ seq.set_definition('Nx', Nx)
 seq.set_definition('Nr', Nr)
 seq.write('gre_rad_pypulseq.seq')
 
-# trajectory calculation
+# Trajectory calculation
 k_traj_adc, k_traj, t_excitation, t_refocusing, t_adc = seq.calculate_kspace()
 plt.figure()
 plt.plot(np.transpose(k_traj))
@@ -148,8 +151,8 @@ plt.plot(k_traj_adc[0], k_traj_adc[1], 'r.')
 plt.show()
 
 
-#change the k-space-trajectory in a (256,128,2) format instead of (3, 32768)
-#useful for image reconstruction
+# Change the k-space-trajectory in a (256,128,2) format instead of (3, 32768) (for example)
+# Useful for image reconstruction
 k_traj_neu = np.zeros((Nx, Nr, 2))
 
 k_traj_neu[:, :, 0] = np.reshape(k_traj_adc[0], (Nx, Nr), order='F')
