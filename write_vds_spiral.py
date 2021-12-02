@@ -45,7 +45,7 @@ T0 =system.grad_raster_time # Seconds
 
 Fcoeff = [fov, 0] # FOV decreases linearly from Fcoeff[0] to Fcoeff[0]-Fcoeff[1].
 #if Fcoeff = [fov, 0], fov=constante corresponds to the value given at the beginning of the program
-#if Fcoeff = [0.240, 0.120] FOV decreases linearly from 24 cm to 12 cm
+#if Fcoeff = [0.240, -0.120] FOV decreases linearly from 24 cm to 12 cm
 
 res=fov/Nx #m
 
