@@ -1,4 +1,4 @@
-# spiral sequence
+# spiral sequence #Matlab translation
 import math
 import copy
 import numpy as np
