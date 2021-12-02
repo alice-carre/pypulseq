@@ -21,7 +21,7 @@ Ndummy = 20  # number of dummy scans
 delta = np.pi / Nr  # angular increment
 
 # Golden Angle Case:
-#delta = (np.pi / 180) * (180 * 0.618034) # angular increment # full spokes
+# delta = (np.pi / 180) * (180 * 2/(1+np.sqrt(5))) # angular increment # full spokes
 
 # more in-depth parameters
 rf_spoiling_inc = 117  # RF spoiling increment
