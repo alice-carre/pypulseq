@@ -7,6 +7,7 @@ from matplotlib import pyplot as plt
 import pypulseq as pp
 from pypulseq.rotate import rotate
 from pypulseq.make_arbitrary_grad import make_arbitrary_grad
+from pypulseq.write_seq_definitions import write_seq_definitions
 
 seq = pp.Sequence()  # Create a new sequence object
 fov = 256e-3  # Define FOV
@@ -19,11 +20,11 @@ phi = np.pi / 2
 N_shot = 3
 
 # Set the system limits
-system = pp.Opts(max_grad=30, grad_unit='mT/m', max_slew=200, slew_unit='T/m/s', rf_ringdown_time=30e-6,
+system = pp.Opts(max_grad=30, grad_unit='mT/m', max_slew=128, slew_unit='T/m/s', rf_ringdown_time=30e-6,
                  rf_dead_time=100e-6, adc_dead_time=10e-6)
 
 # Create 90 degree slice selection pulse and gradient
-rf, gz, gzr = pp.make_sinc_pulse(flip_angle=np.pi / 2, duration=3e-3, slice_thickness=slice_thickness,
+rf, gz, gzr = pp.make_sinc_pulse(flip_angle=phi, duration=3e-3, slice_thickness=slice_thickness,
                                  apodization=0.5, time_bw_product=4, system=system, return_gz=True)
 
 # Define k-space parameters
@@ -42,18 +43,21 @@ teta_max = k_max / lbd
 a2 = (9 * beta / 4) ** (1 / 3)
 Ts = (3 / 2 * system.max_grad / (lbd * a2 ** 2)) ** 3
 teta_s = 1 / 2 * beta * Ts ** 2 / (capital_lbd + beta / 2 / a2 * Ts ** (4 / 3))
-# T_acq = 2*np.pi*fov/(3*N_shot)*np.sqrt(1/(2*system.max_slew*(delta_x)**3)) # for large Go, slow SR0, small Nshot, or large FOV
 T_acq = Ts + lbd / (system.max_grad * 2) * (teta_max ** 2 - teta_s ** 2)
+if Ts>T_acq:
+    T_acq = 2*np.pi*fov/(3*N_shot)*np.sqrt(1/(2*system.max_slew*(delta_x)**3)) # for large Go, slow SR0, small Nshot, or large FOV
+
 
 # Definition of a desired number of samples - copied on the matlab code # not sure if appropriate
-k_radius = int(np.round(Nx / 2))
-k_samples = int(np.round(np.pi * k_radius ** 2 * oversampling / N_shot))
+#k_radius = int(np.round(Nx / 2))
+#k_samples2=int(np.round(np.pi * k_radius * oversampling * k_radius / N_shot))
+k_samples = round(T_acq/system.grad_raster_time)
 
 t = np.linspace(0, T_acq, k_samples)
 List_grad_and_slew_rate_original = []
 
 for index in range(N_shot):
-    # Calculate a raw Archimedian spiral trajectory
+    # Calculate a raw Archimedian spiral trajectory # constant linear velocity
     ka = np.zeros((2, k_samples))
     for c in range(k_samples):
         if t[c] < Ts:
@@ -94,7 +98,16 @@ for index in range(0, N_shot):
     List_gradients.append((gx, gy, gx_spoil, gy_spoil))
 
 # Calculate ADC
+#To be tested on the scanner
 adc_time = T_acq
+adc_samples = round(k_samples*oversampling)
+adc_dwell = round(adc_time / adc_samples / 100e-9) * 100e-9  # on Siemens adc_dwell needs to be aligned to 100ns
+adc = pp.make_adc(num_samples=adc_samples, dwell=adc_dwell, delay=pp.calc_duration(gz_reph))
+
+
+"""
+# Calculate ADC
+adc_time = np.shape(spiral_grad_shape)[1]*system.grad_raster_time
 # the (Siemens) interpreter sequence
 # per default will try to split the trajectory into segments <=1000 samples
 # and every of these segments will have to have duration aligned to the
@@ -112,6 +125,7 @@ if np.floor(divmod(adc_segment_duration, system.grad_raster_time)[1]) > np.finfo
 adc_segments = np.floor(adc_time / adc_segment_duration)
 adc_samples = adc_segments * adc_samples_per_segment
 adc = pp.make_adc(num_samples=adc_samples, dwell=adc_dwell, delay=pp.calc_duration(gz_reph))
+"""
 
 # Define sequence blocks
 for s in range(0, N_slices):
@@ -164,10 +178,9 @@ else:
     print('Timing check failed! Error listing follows\n')
     print(error_report)
 
-seq.set_definition('FOV', [fov, fov, slice_thickness])
-seq.set_definition('Name', 'spiral')
-seq.set_definition('MaxAdcSegmentLength', adc_samples_per_segment)
-seq.set_definition('Sampling_scheme', 'spiral')
+write_seq_definitions(seq, fov=fov, slice_thickness=slice_thickness, Name='spiral', alpha = phi, Nx=Nx,
+                      Sampling_scheme='spiral', Ny=Ny, N_slices=N_slices, N_interleaves = N_shot)
+#seq.set_definition('MaxAdcSegmentLength', adc_samples_per_segment)
 seq.write('spiral.seq')  # Output sequence for scanner
 
 plt.figure()
@@ -182,3 +195,4 @@ plt.figure()
 plt.plot(k_traj[0], k_traj[1], 'b')
 plt.plot(k_traj_adc[0], k_traj_adc[1], 'r.')
 plt.show()
+
