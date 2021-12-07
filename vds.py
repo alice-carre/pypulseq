@@ -1,10 +1,12 @@
 """
+
 # Program translated from the matlab Program of Brian Hargreaves:
 http://mrsrl.stanford.edu/~brian/vdspiral/
 #Adaptation was also made from the original program to change the default unit of the matlab program
-#and were corrected in the description of the program
+#and were corrected in the description of the program underneath
 #In this new version the smax and gmax values are given in Hz/m/s and Hz/m/s and already consider the gamma factor
 
+#Descrption given by Brian Hargreaves and where units were adapted to the modifications done
 %	function [k,g,s,time,r,theta] = vds(smax,gmax,T,N,Fcoeff,rmax)
 %
 %	VARIABLE DENSITY SPIRAL GENERATION:
@@ -107,46 +109,53 @@ http://mrsrl.stanford.edu/~brian/vdspiral/
 %
 %	See Brian's journal, Vol 6, P.24.
 %
-%
-%	See also:  vds2.m,  vdsmex.m,  vds.c
-%
-
-% =============== CVS Log Messages ==========================
-%	$Log: vds.m,v $
-%	Revision 1.5  2004/04/27 18:08:44  brian
-%	Changed FOV to a polynomial of unlimited length,
-%	and hopefully changed all comments accordingly.
-%	Also moved sub-functions into vds.m so that
-%	no other .m files are needed.
-%
-%	Revision 1.4  2003/09/16 02:55:52  brian
-%	minor edits
-%
-%	Revision 1.3  2002/11/18 05:36:02  brian
-%	Rounds lengths to a multiple of 4 to avoid
-%	frame size issues later on.
-%
-%	Revision 1.2  2002/11/18 05:32:19  brian
-%	minor edits
-%
-%	Revision 1.1  2002/03/28 01:03:20  bah
-%	Added to CVS
-%
-%
 % ===========================================================
 """
 import numpy as np
 from matplotlib import pyplot as plt
+from typing import Tuple
 
-def qdf(a:float, b:float, c:float) -> tuple[float,float]:
+def qdf(a:float, b:float, c:float) -> Tuple[float,float]:
+    """
+    returns the roots of a 2nd degree polynom ax**2+bx+c
+
+       Parameters
+       ----------
+       a : float
+       b : float
+       c: float
+
+       Returns
+       -------
+       tuple(root1, root2): tuple(float,float)
+    """
 
     d = b**2-4*a*c
     roots = ((-b+np.sqrt(d))/(2*a),(-b-np.sqrt(d))/(2*a))
 
     return roots
 
-def findq2r2(smax:float, gmax:float, r:float, r1:float, T:float, Ts:float, N:int, Fcoeff:list, rmax:float) -> tuple[float,float]:
+def findq2r2(smax:float, gmax:float, r:float, r1:float, T:float, Ts:float, N:int, Fcoeff:list, rmax:float) -> Tuple[float,float]:
+    """
+    returns the second derivative of the angle theta (q) and the second derivative of the radius r in the spiral trajectory
+    to be integrated to have the angle and radius increment
 
+       Parameters
+       ----------
+        smax : float - maximal slew rate of the system in Hz/m/s (the gamma factor is considered in the value of smax itself)
+        gmax : float - maximal gradient amplitude in Hz/m (the gamma factor is considered in the value of gmax itself)
+        r : float - radius of the spiral being constructed in m
+        r1 : float - derivative of the radius of the spiral being constructed in m
+        T : float - sampling period (s) for gradient AND acquisition.
+        Ts : float - sampling period (s) for gradient AND acquisition divided by an oversampling period
+        N : int - number of interleaves
+        Fcoeff : list - numbers between which the FOV varies
+        rmax : float - maximal radius in k-sapce  in m^(-1)
+
+       Returns
+       -------
+       tuple(q2, r2): tuple(float,float) - rad/s^(-2), m/s^(-2)
+    """
     F = 0 #FOV function value for this r.
     dFdr = 0 # dFOV/dr for this value of r.
 
@@ -186,16 +195,37 @@ def findq2r2(smax:float, gmax:float, r:float, r1:float, T:float, Ts:float, N:int
 
     return q2, r2
 
-def vds(smax:float, gmax:float, T:float, N:int, Fcoeff:list, rmax:float)-> tuple[np.array, np.array, np.array,
-                                                                                 np.array, np.array, np.array]:
+def vds(smax:float, gmax:float, T:float, N:int, Fcoeff:list, rmax:float)-> Tuple[np.array, np.array, np.array,
+                                                                              np.array, np.array, np.array]:
+    """
+    returns k - the trajectory in m^(-1), g - the corresponding gradient in Hz/m, s - slew rate in Hz/m/s,
+    t - time in s, r - radius in m and angle theta in rad
+
+       Parameters
+       ----------
+        smax : float - maximal slew rate of the system in Hz/m/s (the gamma factor is considered in the value of smax itself)
+        gmax : float - maximal gradient amplitude in Hz/m (the gamma factor is considered in the value of gmax itself)
+        r : float - radius of the spiral being constructed in m
+        r1 : float - derivative of the radius of the spiral being constructed in m
+        T : float - sampling period (s) for gradient AND acquisition.
+        Ts : float - sampling period (s) for gradient AND acquisition divided by an oversampling period
+        N : int - number of interleaves
+        Fcoeff : list - numbers between which the FOV varies
+        rmax : float - maximal radius in k-sapce  in m^(-1)
+
+       Returns
+       -------
+       tuple(k,g,s,t,r,theta) : tuple[np.array, np.array, np.array, np.array, np.array, np.array]
+
+    """
 
     oversampling = 8 # Keep this even.
     To = T/oversampling # To is the period with oversampling.
 
-    q0=0
-    q1=0
-    r0=0
-    r1=0
+    q0=0 #rad
+    q1=0 #rad/s^(-1)
+    r0=0 #m
+    r1=0 #m/s^(-1)
 
     t=0
     count=0
