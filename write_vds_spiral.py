@@ -87,7 +87,6 @@ adc = pp.make_adc(num_samples=adc_samples, dwell=adc_dwell, delay=pp.calc_durati
 # Define sequence blocks
 for s in range(0, N_slices):
     for i in range(0, N_shot):
-        # seq.add_block(rf_fs,gz_fs) # fat-sat
         spiral_grad_shape = np.zeros((2, np.shape(g)[0]))
         spiral_grad_shape[0] = np.real(g * np.exp(1j * delta * i))
         spiral_grad_shape[1] = np.imag(g * np.exp(1j * delta * i))
@@ -96,7 +95,7 @@ for s in range(0, N_slices):
         spiral_grad_shape = np.c_[spiral_grad_shape, spiral_grad_shape[:, -1]]
 
         # Readout grad
-        plt.plot(spiral_grad_shape[0])
+        #plt.plot(spiral_grad_shape[0])
         gx = make_arbitrary_grad(channel='x', waveform=spiral_grad_shape[0], delay=pp.calc_duration(gz_reph))
         gy = make_arbitrary_grad(channel='y', waveform=spiral_grad_shape[1], delay=pp.calc_duration(gz_reph))
 
