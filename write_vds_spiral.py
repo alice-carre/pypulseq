@@ -23,7 +23,7 @@ N_shot = 2 # Interleaves
 delta = 2 * np.pi/N_shot
 
 # Golden Angle Case:
-#delta = 2*np.pi - (2*np.pi) * (2/(1+np.sqrt(5))) # angular increment # full spokes # angle = 137.51°
+#delta = 2*np.pi - (2*np.pi) * (2/(1+np.sqrt(5))) # angular increment # angle = 137.51°
 
 # Set the system limits
 system = pp.Opts(max_grad=30, grad_unit='mT/m', max_slew=128, slew_unit='T/m/s', rf_ringdown_time=30e-6,
