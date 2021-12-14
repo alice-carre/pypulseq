@@ -8,6 +8,7 @@ import pypulseq as pp
 from pypulseq.rotate import rotate
 from pypulseq.rotate import scale_grad
 from pypulseq.rotate import get_grad_abs_mag
+from pypulseq.write_seq_definitions import write_seq_definitions
 
 seq = pp.Sequence()  # Create a new sequence object
 fov = 250e-3  # Define FOV
@@ -21,7 +22,7 @@ Ndummy = 20  # number of dummy scans
 delta = np.pi / Nr  # angular increment
 
 # Golden Angle Case:
-# delta = (np.pi / 180) * (180 * 2/(1+np.sqrt(5))) # angular increment # full spokes
+# delta = (np.pi / 180) * (180 * 2/(1+np.sqrt(5))) # angular increment # full spokes # angle = 111.25°
 
 # more in-depth parameters
 rf_spoiling_inc = 117  # RF spoiling increment
@@ -132,13 +133,9 @@ for i in range(-Ndummy, Nr + 1, 1):
 seq.plot()
 plt.show()
 # Prepare the sequence output for the scanner
-seq.set_definition('FOV', [fov, fov, slice_thickness])
-seq.set_definition('Name', 'gre_rad')
-seq.set_definition('TE', TE)
-seq.set_definition('TR', TR)
-seq.set_definition('Flipangle', alpha)
-seq.set_definition('Nx', Nx)
-seq.set_definition('Nr', Nr)
+write_seq_definitions(seq=seq, fov=fov, slice_thickness=slice_thickness,Name='gre_rad',alpha=alpha,Nx=Nx,
+                      Sampling_scheme='radial',Nr=Nr,TE=TE,TR=TR)
+seq.set_definition('delta', delta)
 seq.write('gre_rad_pypulseq.seq')
 
 # Trajectory calculation
