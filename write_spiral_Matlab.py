@@ -15,16 +15,16 @@ Nx = Ny = 256  # Define resolution
 slice_thickness = 3e-3  # Slice thickness
 N_slices = 1
 oversampling = 1
-N_shot = 2
+N_shot = 2 # only works for 1 or 2 interleaves so far
 delta = 2 * np.pi/N_shot
-
+phi=10 #grad
 # Golden Angle Case:
 #delta = 2*np.pi - (2*np.pi) * (2/(1+np.sqrt(5))) # angular increment # angle = 137.51°
 
 
 # Set the system limits
 seq = pp.Sequence()  # Create a new sequence object
-system = pp.Opts(max_grad=30, grad_unit='mT/m', max_slew=120, slew_unit='T/m/s', rf_ringdown_time=30e-6,
+system = pp.Opts(max_grad=20, grad_unit='mT/m', max_slew=100, slew_unit='T/m/s', rf_ringdown_time=30e-6,
                  rf_dead_time=100e-6, adc_dead_time=10e-6)
 
 # Define k-space parameters
@@ -34,8 +34,6 @@ N_theta = int(np.round(2 * np.pi * N_r) * oversampling)
 N_total = int(round(N_r * N_theta / N_shot)) # modification due to several interleaves : divide by N_shot
 
 # Calculate a raw Archimedian spiral trajectory
-#ka = np.zeros((2, N_total + 1))
-#for c in range(0, N_total + 1):
 ka = np.zeros((2, N_total))
 for c in range(0, N_total):
     r = delta_k * c / N_theta * N_shot # modification due to several interleaves : multiply by N_shot
@@ -75,8 +73,8 @@ ka_opt[1] = np.interp(grad_timing, t_smooth, ka[1])
 # convert optimized trajectory to final gradient and slew rate values
 ga_opt, sa_opt = pp.traj_to_grad(ka_opt)
 
-# Create 90 degree slice selection pulse and gradient (needs to be created before ADC to calculate correct ADC delay)
-rf, gz, gzr = pp.make_sinc_pulse(flip_angle=np.pi / 2, duration=3e-3, slice_thickness=slice_thickness,
+# Create slice selection pulse and gradient (needs to be created before ADC to calculate correct ADC delay)
+rf, gz, gzr = pp.make_sinc_pulse(flip_angle=phi*np.pi/180, duration=3e-3, slice_thickness=slice_thickness,
                                  apodization=0.5, time_bw_product=4, system=system, return_gz=True)
 gz_reph = pp.make_trapezoid(channel='z', area=-gz.area / 2, system=system)
 
@@ -86,24 +84,6 @@ adc_samples = N_total
 adc_dwell = round(adc_time / adc_samples / 100e-9) * 100e-9  # on Siemens adc_dwell needs to be aligned to 100ns
 adc = pp.make_adc(num_samples=adc_samples, dwell=adc_dwell, delay=pp.calc_duration(gz_reph))
 
-"""
-# calculate ADC
-adc_raster_time = 100e-9
-adc_samples_desired = N_total
-adc_samples_per_segment = 1000
-adc_segments = np.ceil(adc_samples_desired / adc_samples_per_segment)
-adc_samples_total = adc_segments * adc_samples_per_segment
-
-adc_time = system.grad_raster_time * ga_opt.shape[1]
-adc_dwell = np.ceil(adc_time / adc_samples_total / adc_raster_time) * adc_raster_time
-
-adc = pp.make_adc(num_samples=adc_samples_total, dwell=adc_dwell, delay=pp.calc_duration(gz_reph))
-
-adc_segment_duration = adc_samples_per_segment * adc_dwell
-if np.floor(divmod(adc_segment_duration, system.grad_raster_time)[1]) > np.finfo(float).eps:
-    raise TypeError("ADC segmentation model results in incorrect segment duration")
-
-"""
 # Extend spiral_grad_shape by repeating the last sample
 # This is needed to accomodate for the ADC tuning delay
 spiral_grad_shape = np.c_[ga_opt, ga_opt[:, -1]]
@@ -169,7 +149,7 @@ else:
 write_seq_definitions(seq, fov=fov, slice_thickness=slice_thickness, Name='spiral', alpha = np.pi/2, Nx=Nx,
                       Sampling_scheme='spiral', Ny=Ny, N_slices=N_slices, N_interleaves = N_shot)
 #seq.set_definition('MaxAdcSegmentLength', adc_samples_per_segment)
-seq.write('spiral.seq')  # Output sequence for scanner
+seq.write('matlab_spiral.seq')  # Output sequence for scanner
 seq.plot()
 # Single-function for trajectory calculation
 k_traj_adc, k_traj, t_excitation, t_refocusing, t_adc = seq.calculate_kspace()
