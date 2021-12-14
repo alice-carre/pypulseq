@@ -195,8 +195,14 @@ def findq2r2(smax:float, gmax:float, r:float, r1:float, T:float, Ts:float, N:int
 
     return q2, r2
 
-def vds(smax:float, gmax:float, T:float, N:int, Fcoeff:list, rmax:float)-> Tuple[np.array, np.array, np.array,
-                                                                              np.array, np.array, np.array]:
+def vds(smax:float,
+        gmax:float,
+        T:float,
+        N:int,
+        Fcoeff:list,
+        rmax:float,
+        oversampling:int) \
+        -> Tuple[np.array, np.array, np.array, np.array, np.array, np.array]:
     """
     returns k - the trajectory in m^(-1), g - the corresponding gradient in Hz/m, s - slew rate in Hz/m/s,
     t - time in s, r - radius in m and angle theta in rad
@@ -219,7 +225,7 @@ def vds(smax:float, gmax:float, T:float, N:int, Fcoeff:list, rmax:float)-> Tuple
 
     """
 
-    oversampling = 8 # Keep this even.
+    #oversampling = 16 # Keep this even.
     To = T/oversampling # To is the period with oversampling.
 
     q0=0 #rad
@@ -242,7 +248,7 @@ def vds(smax:float, gmax:float, T:float, N:int, Fcoeff:list, rmax:float)-> Tuple
         q0 = q0 + q1 * To
         t += To
 
-        r1 += r2*To
+        r1 += r2 * To
         r0 += r1 * To
 
         #Store
@@ -278,9 +284,9 @@ def vds(smax:float, gmax:float, T:float, N:int, Fcoeff:list, rmax:float)-> Tuple
     s1[1:] = g
     s2[:-1] = g
     s = (s1 - s2) / T
-    s = s[0:len(k)]
+    s = s[0:np.shape(k)[0]]
 
-    """
+
     #Plot
     plt.figure()
     plt.subplot(2, 2, 1)
@@ -304,6 +310,6 @@ def vds(smax:float, gmax:float, T:float, N:int, Fcoeff:list, rmax:float)-> Tuple
     plt.ylabel('Slew Rate (Hz/m/s)')
 
     plt.show()
-    """
+
 
     return k.flatten(),g.flatten(),s.flatten(),time.flatten(),r.flatten(),theta.flatten()
