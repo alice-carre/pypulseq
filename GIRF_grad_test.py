@@ -1,12 +1,10 @@
 import math
-import copy
 import numpy as np
 from matplotlib import pyplot as plt
 
 import pypulseq as pp
 from pypulseq.gradient_distort_GIRF import gradient_distort_GIRF
 from pypulseq.gradient_distort_GIRF import plot_grad_predicted_measured
-
 
 import os
 import nibabel as nib
